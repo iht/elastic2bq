@@ -1,0 +1,213 @@
+{
+  "id": "bigquery-public-data:github_repos.commits",
+  "kind": "bigquery#table",
+  "numRows": "262745001",
+  "schema": {
+    "fields": [
+      {
+        "mode": "NULLABLE",
+        "name": "commit",
+        "type": "STRING"
+      },
+      {
+        "mode": "NULLABLE",
+        "name": "tree",
+        "type": "STRING"
+      },
+      {
+        "mode": "REPEATED",
+        "name": "parent",
+        "type": "STRING"
+      },
+      {
+        "fields": [
+          {
+            "mode": "NULLABLE",
+            "name": "name",
+            "type": "STRING"
+          },
+          {
+            "mode": "NULLABLE",
+            "name": "email",
+            "type": "STRING"
+          },
+          {
+            "mode": "NULLABLE",
+            "name": "time_sec",
+            "type": "INTEGER"
+          },
+          {
+            "mode": "NULLABLE",
+            "name": "tz_offset",
+            "type": "INTEGER"
+          },
+          {
+            "fields": [
+              {
+                "mode": "NULLABLE",
+                "name": "seconds",
+                "type": "INTEGER"
+              },
+              {
+                "mode": "NULLABLE",
+                "name": "nanos",
+                "type": "INTEGER"
+              }
+            ],
+            "mode": "NULLABLE",
+            "name": "date",
+            "type": "RECORD"
+          }
+        ],
+        "mode": "NULLABLE",
+        "name": "author",
+        "type": "RECORD"
+      },
+      {
+        "fields": [
+          {
+            "mode": "NULLABLE",
+            "name": "name",
+            "type": "STRING"
+          },
+          {
+            "mode": "NULLABLE",
+            "name": "email",
+            "type": "STRING"
+          },
+          {
+            "mode": "NULLABLE",
+            "name": "time_sec",
+            "type": "INTEGER"
+          },
+          {
+            "mode": "NULLABLE",
+            "name": "tz_offset",
+            "type": "INTEGER"
+          },
+          {
+            "fields": [
+              {
+                "mode": "NULLABLE",
+                "name": "seconds",
+                "type": "INTEGER"
+              },
+              {
+                "mode": "NULLABLE",
+                "name": "nanos",
+                "type": "INTEGER"
+              }
+            ],
+            "mode": "NULLABLE",
+            "name": "date",
+            "type": "RECORD"
+          }
+        ],
+        "mode": "NULLABLE",
+        "name": "committer",
+        "type": "RECORD"
+      },
+      {
+        "mode": "NULLABLE",
+        "name": "subject",
+        "type": "STRING"
+      },
+      {
+        "mode": "NULLABLE",
+        "name": "message",
+        "type": "STRING"
+      },
+      {
+        "fields": [
+          {
+            "mode": "NULLABLE",
+            "name": "key",
+            "type": "STRING"
+          },
+          {
+            "mode": "NULLABLE",
+            "name": "value",
+            "type": "STRING"
+          },
+          {
+            "mode": "NULLABLE",
+            "name": "email",
+            "type": "STRING"
+          }
+        ],
+        "mode": "REPEATED",
+        "name": "trailer",
+        "type": "RECORD"
+      },
+      {
+        "fields": [
+          {
+            "mode": "NULLABLE",
+            "name": "old_mode",
+            "type": "INTEGER"
+          },
+          {
+            "mode": "NULLABLE",
+            "name": "new_mode",
+            "type": "INTEGER"
+          },
+          {
+            "mode": "NULLABLE",
+            "name": "old_path",
+            "type": "STRING"
+          },
+          {
+            "mode": "NULLABLE",
+            "name": "new_path",
+            "type": "STRING"
+          },
+          {
+            "mode": "NULLABLE",
+            "name": "old_sha1",
+            "type": "STRING"
+          },
+          {
+            "mode": "NULLABLE",
+            "name": "new_sha1",
+            "type": "STRING"
+          },
+          {
+            "mode": "NULLABLE",
+            "name": "old_repo",
+            "type": "STRING"
+          },
+          {
+            "mode": "NULLABLE",
+            "name": "new_repo",
+            "type": "STRING"
+          }
+        ],
+        "mode": "REPEATED",
+        "name": "difference",
+        "type": "RECORD"
+      },
+      {
+        "mode": "NULLABLE",
+        "name": "difference_truncated",
+        "type": "BOOLEAN"
+      },
+      {
+        "mode": "REPEATED",
+        "name": "repo_name",
+        "type": "STRING"
+      },
+      {
+        "mode": "NULLABLE",
+        "name": "encoding",
+        "type": "STRING"
+      }
+    ]
+  },
+  "selfLink": "https://bigquery.googleapis.com/bigquery/v2/projects/bigquery-public-data/datasets/github_repos/tables/commits",
+  "tableReference": {
+    "datasetId": "github_repos",
+    "projectId": "bigquery-public-data",
+    "tableId": "commits"
+  },
+  "type": "TABLE"
+}

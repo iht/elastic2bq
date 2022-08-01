@@ -34,4 +34,9 @@ public interface Elastic2BQOptions extends PipelineOptions {
   String getBigQueryTable();
 
   void setBigQueryTable(String s);
+
+  @Description("Schema of the type in Elastic, it is the same schema used for BigQuery")
+  String getSchema();
+
+  void setSchema(String s);
 }

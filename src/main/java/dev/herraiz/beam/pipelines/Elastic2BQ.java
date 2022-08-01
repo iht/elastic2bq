@@ -5,6 +5,8 @@ import org.apache.beam.sdk.Pipeline;
 import org.apache.beam.sdk.io.elasticsearch.ElasticsearchIO;
 import org.apache.beam.sdk.io.elasticsearch.ElasticsearchIO.ConnectionConfiguration;
 import org.apache.beam.sdk.options.PipelineOptionsFactory;
+import org.apache.beam.sdk.schemas.Schema;
+import org.apache.beam.sdk.transforms.JsonToRow;
 import org.apache.beam.sdk.values.PCollection;
 
 public class Elastic2BQ {
@@ -15,8 +17,19 @@ public class Elastic2BQ {
     Pipeline p = Pipeline.create(options);
 
     String[] host = {options.getElasticHost()};
-    PCollection<String> jsonStrings = p.apply(ElasticsearchIO.read().withConnectionConfiguration(
-        ConnectionConfiguration.create(host, options.getElasticIndex(), options.getElasticType())
-    ));
+
+    String schemaStr = options.getSchema();
+
+
+
+    PCollection<String> jsonStrings = p.apply("Read from Elastic",
+        ElasticsearchIO.read().withConnectionConfiguration(
+            ConnectionConfiguration.create(
+                host,
+                options.getElasticIndex(),
+                options.getElasticType())
+        ));
+
+    //jsonStrings.apply(JsonToRow.withExceptionReporting());
   }
 }
