@@ -26,6 +26,8 @@ public class JsonSchemaParser {
    * @throws JsonProcessingException If the string cannot be parsed as JSON.
    */
   public static Schema bqJson2BeamSchema(String schemaAsString) throws Exception {
+    // We assume the schema is a BQ JSON schema, with a schema field, containing an array of
+    // name fields.
     ObjectMapper mapper = new ObjectMapper();
     JsonNode topNode = mapper.readTree(schemaAsString);
     JsonNode schemaRootNode = topNode.path(ROOT_NODE_PATH);
@@ -53,23 +55,30 @@ public class JsonSchemaParser {
       String name = childNode.path("name").asText();
       String type = childNode.path("type").asText().toUpperCase();
 
-      FieldType beamType;
+      assert !mode.isEmpty();
+      assert !name.isEmpty();
+      assert !type.isEmpty();
 
+      FieldType beamType;
       if (type.equals("RECORD")) {
+        // If this is a nested record, we recursively parse the nested record
         Schema recordSchema = parseSchema(childNode);
-        beamType = FieldType.row(recordSchema);
+        beamType = FieldType.row(recordSchema);  // The type will be "row"
       } else {
+        // If it is not a record, then it must be one of the basic types of BQ
         beamType = string2FieldType(type);
       }
 
       assert beamType != null;
 
       Field field;
+      // In BQ schemas, REPEATED and NULLABLE cannot happen at the same time
       if (isRepeated) {
         field = Field.of(name, FieldType.array(beamType));
       } else if (isNullable) {
         field = Field.nullable(name, beamType);
       } else {
+        // If the mode was not NULLABLE nor REPEATED, it had to be REQUIRED
         field = Field.of(name, beamType);
       }
 
@@ -82,6 +91,8 @@ public class JsonSchemaParser {
   }
 
   private static FieldType string2FieldType(String type) {
+    // We map the BQ types to the corresponding Beam types.
+    // FIXME: this mapping is not yet exhaustive, some types are missing
     FieldType beamType = switch (type) {
       case "STRING" -> FieldType.STRING;
       case "BYTES" -> FieldType.BYTES;
@@ -93,6 +104,10 @@ public class JsonSchemaParser {
       default -> null;
     };
 
+    // FIXME: we assume we can map all BQ types to a Beam type
+    // There are some BQ types (GEOGRAPHY, JSON, etc) that cannot be mapped to any Beam type.
+    // We should add some exception or warning about those columns (e.g. if we decide to ignore
+    // those columns).
     assert beamType != null;
     return beamType;
   }
