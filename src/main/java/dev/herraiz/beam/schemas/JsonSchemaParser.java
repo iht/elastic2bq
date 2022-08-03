@@ -11,7 +11,7 @@ import org.apache.beam.sdk.schemas.Schema.FieldType;
 
 
 /**
- * This class allows you to transform a BigQuery JSON string into a Beam schema.
+ * Transform a BigQuery JSON string into a Beam schema.
  */
 public class JsonSchemaParser {
 

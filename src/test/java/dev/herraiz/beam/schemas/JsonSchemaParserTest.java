@@ -41,7 +41,7 @@ public class JsonSchemaParserTest {
     Schema committer = committerType.getRowSchema();
     assertNotNull("Committer column exists", committer);
     assertEquals("Committer has 5 nested columns", 5, committer.getFieldCount());
-    assertNull("Comitter is not an array", committerType.getCollectionElementType());
+    assertNull("Committer is not an array", committerType.getCollectionElementType());
   }
 
   @Test
