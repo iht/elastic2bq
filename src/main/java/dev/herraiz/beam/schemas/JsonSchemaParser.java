@@ -17,12 +17,8 @@ public class JsonSchemaParser {
 
   private static final String ROOT_NODE_PATH = "schema";
   private static final String FIELDS_NODE_PATH = "fields";
-  private static final String REPEATED_MODE = "REPEATED";
-
 
   private static final Logger LOGGER = LoggerFactory.getLogger(JsonSchemaParser.class);
-
-  private final Map<String, Field> beamFields = new HashMap<>();
 
   public JsonSchemaParser(String schemaAsString) {
     ObjectMapper mapper = new ObjectMapper();
@@ -37,10 +33,10 @@ public class JsonSchemaParser {
     JsonNode rootNode = root.path(ROOT_NODE_PATH);
   }
 
-  private Schema parseSchema(JsonNode rootNode) {
+  private static Schema parseSchema(JsonNode rootNode) {
     List<Field> beamFields = new ArrayList<>();
     for (JsonNode childNode : rootNode.path(FIELDS_NODE_PATH)) {
-      boolean isRepated = childNode.path("mode").asText().equals(REPEATED_MODE);
+      boolean isRepeated = childNode.path("mode").asText().toUpperCase().equals("REPEATED");
 
       String name = childNode.path("name").asText();
       String type = childNode.path("type").asText().toUpperCase();
@@ -55,7 +51,7 @@ public class JsonSchemaParser {
       }
 
       Field field;
-      if (isRepated) {
+      if (isRepeated) {
         field = Field.of(name, FieldType.array(beamType));
       } else {
         field = Field.of(name, beamType);
@@ -67,24 +63,17 @@ public class JsonSchemaParser {
     return Schema.of(beamFields.toArray(Field[]::new));
   }
 
-  private FieldType string2FieldType(String type) {
-    FieldType beamType = null;
-
-    if (type.equals("STRING")) {
-      beamType = FieldType.STRING;
-    } else if (type.equals("BYTES")) {
-      beamType = FieldType.BYTES;
-    } else if (type.equals("NUMERIC") || type.equals("BIGNUMERIC")) {
-      beamType = FieldType.DECIMAL;
-    } else if (type.equals("BOOL")) {
-      beamType = FieldType.BOOLEAN;
-    } else if (type.equals("DATETIME")) {
-      beamType = FieldType.DATETIME;
-    } else if (type.equals("INT64") || type.equals("INT")) {
-      beamType = FieldType.INT64;
-    } else if (type.equals("FLOAT64")) {
-      beamType = FieldType.DOUBLE;
-    }
+  private static FieldType string2FieldType(String type) {
+    FieldType beamType = switch (type) {
+      case "STRING" -> FieldType.STRING;
+      case "BYTES" -> FieldType.BYTES;
+      case "NUMERIC", "BIGNUMERIC" -> FieldType.DECIMAL;
+      case "BOOL" -> FieldType.BOOLEAN;
+      case "DATETIME" -> FieldType.DATETIME;
+      case "INT64", "INT" -> FieldType.INT64;
+      case "FLOAT64" -> FieldType.DOUBLE;
+      default -> null;
+    };
 
     assert beamType != null;
     return beamType;
