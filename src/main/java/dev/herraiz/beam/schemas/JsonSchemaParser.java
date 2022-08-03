@@ -4,39 +4,28 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
+import java.util.Objects;
 import org.apache.beam.sdk.schemas.Schema;
 import org.apache.beam.sdk.schemas.Schema.Field;
 import org.apache.beam.sdk.schemas.Schema.FieldType;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 public class JsonSchemaParser {
 
   private static final String ROOT_NODE_PATH = "schema";
   private static final String FIELDS_NODE_PATH = "fields";
 
-  private static final Logger LOGGER = LoggerFactory.getLogger(JsonSchemaParser.class);
-
-  public JsonSchemaParser(String schemaAsString) {
+  public static Schema bqJson2BeamSchema(String schemaAsString) throws JsonProcessingException {
     ObjectMapper mapper = new ObjectMapper();
-    JsonNode root = null;
-    try {
-      root = mapper.readTree(schemaAsString);
-    } catch (JsonProcessingException e) {
-      e.printStackTrace();
-      LOGGER.error("Unable to parse the JSON schema provided. Make sure it is a BQ-style schema.");
-      System.exit(1);
-    }
-    JsonNode rootNode = root.path(ROOT_NODE_PATH);
+    JsonNode topNode = mapper.readTree(schemaAsString);
+    JsonNode schemaRootNode = topNode.path(ROOT_NODE_PATH);
+    return parseSchema(schemaRootNode);
   }
 
   private static Schema parseSchema(JsonNode rootNode) {
     List<Field> beamFields = new ArrayList<>();
     for (JsonNode childNode : rootNode.path(FIELDS_NODE_PATH)) {
-      boolean isRepeated = childNode.path("mode").asText().toUpperCase().equals("REPEATED");
+      boolean isRepeated = childNode.path("mode").asText().equalsIgnoreCase("REPEATED");
 
       String name = childNode.path("name").asText();
       String type = childNode.path("type").asText().toUpperCase();
@@ -50,12 +39,16 @@ public class JsonSchemaParser {
         beamType = string2FieldType(type);
       }
 
+      assert beamType != null;
+
       Field field;
       if (isRepeated) {
         field = Field.of(name, FieldType.array(beamType));
       } else {
         field = Field.of(name, beamType);
       }
+
+      assert field != null;
 
       beamFields.add(field);
     }
@@ -78,5 +71,4 @@ public class JsonSchemaParser {
     assert beamType != null;
     return beamType;
   }
-
 }
