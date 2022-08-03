@@ -61,9 +61,9 @@ public class JsonSchemaParser {
       case "STRING" -> FieldType.STRING;
       case "BYTES" -> FieldType.BYTES;
       case "NUMERIC", "BIGNUMERIC" -> FieldType.DECIMAL;
-      case "BOOL" -> FieldType.BOOLEAN;
+      case "BOOL", "BOOLEAN" -> FieldType.BOOLEAN;
       case "DATETIME" -> FieldType.DATETIME;
-      case "INT64", "INT" -> FieldType.INT64;
+      case "INT64", "INT", "INTEGER" -> FieldType.INT64;
       case "FLOAT64" -> FieldType.DOUBLE;
       default -> null;
     };
