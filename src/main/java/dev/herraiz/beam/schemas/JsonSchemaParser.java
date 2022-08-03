@@ -5,27 +5,50 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Objects;
 import org.apache.beam.sdk.schemas.Schema;
 import org.apache.beam.sdk.schemas.Schema.Field;
 import org.apache.beam.sdk.schemas.Schema.FieldType;
 
+
+/**
+ * This class allows you to transform a BigQuery JSON string into a Beam schema.
+ */
 public class JsonSchemaParser {
 
   private static final String ROOT_NODE_PATH = "schema";
   private static final String FIELDS_NODE_PATH = "fields";
 
-  public static Schema bqJson2BeamSchema(String schemaAsString) throws JsonProcessingException {
+  /**
+   * Transform a BigQuery JSON schema into a Beam schema
+   *
+   * @param schemaAsString A string with the full BigQuery schema encoded as JSON
+   * @return A Beam schema that can be used with Row and other Beam classes.
+   * @throws JsonProcessingException If the string cannot be parsed as JSON.
+   */
+  public static Schema bqJson2BeamSchema(String schemaAsString) throws Exception {
     ObjectMapper mapper = new ObjectMapper();
     JsonNode topNode = mapper.readTree(schemaAsString);
     JsonNode schemaRootNode = topNode.path(ROOT_NODE_PATH);
+    if (schemaRootNode.isMissingNode()) {
+      throw new Exception(
+          "Is this a BQ schema? The given schema must have a top node of name " + ROOT_NODE_PATH);
+    }
+
     return parseSchema(schemaRootNode);
   }
 
-  private static Schema parseSchema(JsonNode rootNode) {
+  private static Schema parseSchema(JsonNode rootNode) throws Exception {
     List<Field> beamFields = new ArrayList<>();
-    for (JsonNode childNode : rootNode.path(FIELDS_NODE_PATH)) {
-      boolean isRepeated = childNode.path("mode").asText().equalsIgnoreCase("REPEATED");
+    JsonNode children = rootNode.path(FIELDS_NODE_PATH);
+    if (children.isMissingNode()) {
+      throw new Exception("Is this a BQ schema? The schema field must have another field of name "
+          + FIELDS_NODE_PATH);
+    }
+
+    for (JsonNode childNode : children) {
+      String mode = childNode.path("mode").asText().toUpperCase();
+      boolean isRepeated = mode.equals("REPEATED");
+      boolean isNullable = mode.equals("NULLABLE");
 
       String name = childNode.path("name").asText();
       String type = childNode.path("type").asText().toUpperCase();
@@ -44,6 +67,8 @@ public class JsonSchemaParser {
       Field field;
       if (isRepeated) {
         field = Field.of(name, FieldType.array(beamType));
+      } else if (isNullable) {
+        field = Field.nullable(name, beamType);
       } else {
         field = Field.of(name, beamType);
       }
