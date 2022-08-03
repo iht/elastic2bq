@@ -64,9 +64,7 @@ public class JsonSchemaParser {
       beamFields.add(field);
     }
 
-    Schema schema = Schema.of(beamFields.toArray(new Field[0]));
-
-    return schema;
+    return Schema.of(beamFields.toArray(Field[]::new));
   }
 
   private FieldType string2FieldType(String type) {
