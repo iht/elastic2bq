@@ -16,7 +16,7 @@ public class JsonSchemaParserTest {
 
   @Before
   public void setUp() throws Exception {
-    String schemaPath = "src/test/resources/schemas/github_commits.json";
+    String schemaPath = "src/test/resources/schemas/bigquery_github_commits.json";
     String schemaString = Files.readString(Path.of(schemaPath));
     schema = JsonSchemaParser.bqJson2BeamSchema(schemaString);
   }
