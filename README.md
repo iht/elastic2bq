@@ -31,3 +31,25 @@ Install metricbeat
 `helm install metricbeat elastic/metricbeat -n elastic`
 
 There should be some data in `curl localhost:9200/_cat/indices`
+
+# Get data from Git
+
+Create index in Elastic
+
+```shell
+curl --request PUT \
+--url 'http://localhost:9200/git?pretty=' \
+--header 'Connection: keep-alive'
+```
+
+`cd data`
+
+```shell
+cat data/commits.json | while read l
+do
+  curl --request POST \
+    --url 'http://localhost:9200/git/_doc/?pretty=' \
+    --header 'Content-Type: application/json' \
+    --data "$l"
+done    
+```
