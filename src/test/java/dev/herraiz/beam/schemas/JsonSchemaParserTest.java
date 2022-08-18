@@ -63,7 +63,7 @@ public class JsonSchemaParserTest {
     assertNotNull("Difference is an array", wrappedType);
     Schema trailer = wrappedType.getRowSchema();
     assertNotNull("Difference is an array of non nulls", trailer);
-    assertEquals("Trailer has 8 nested columns", 8, trailer.getFieldCount());
+    assertEquals("Difference has 8 nested columns", 8, trailer.getFieldCount());
   }
 
   @Test
