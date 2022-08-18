@@ -23,3 +23,11 @@ Redirect the ports for Elastic and Kibana to localhost:
 `k port-forward deployment/kibana-kibana 5601 -n elastic`
 
 `k port-forward svc/elasticsearch-master 9200 -n elastic`
+
+# Get some data to play with
+
+Install metricbeat
+
+`helm install metricbeat elastic/metricbeat -n elastic`
+
+There should be some data in `curl localhost:9200/_cat/indices`
