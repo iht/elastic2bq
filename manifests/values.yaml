@@ -2,6 +2,8 @@
 # Permit co-located instances for solitary minikube virtual machines.
 antiAffinity: "soft"
 
+replicas: 1
+
 # Shrink default JVM heap.
 esJavaOpts: "-Xmx128m -Xms128m"
 
