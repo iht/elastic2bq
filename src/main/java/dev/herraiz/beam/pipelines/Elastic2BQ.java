@@ -53,6 +53,9 @@ public class Elastic2BQ {
     String schemaStr = options.getSchema();
     Schema schema = JsonSchemaParser.bqJson2BeamSchema(schemaStr);
 
+    // FIXME: direct runner pipeline to get a sample of JSON data, write to GCS, and load into BQ
+    // then use the inferred schema
+
     Pipeline p = Pipeline.create(options);
 
     // Read data from Elastic as JSON strings
