@@ -20,7 +20,7 @@ public class JsonSchemaInferrer {
     String tableUuid = UUID.randomUUID().toString();
     String tableName = "import-json-sample" + tableUuid;
     BigQuery bigquery = BigQueryOptions.getDefaultInstance().getService();
-    TableId tableId = TableId.of(dataset, tableName);
+    TableId tableId = TableId.of(project, dataset, tableName);
 
     LoadJobConfiguration loadConfig =
         LoadJobConfiguration.newBuilder(tableId, jsonDataLocation)
