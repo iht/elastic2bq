@@ -15,7 +15,7 @@ import java.util.List;
 import java.util.UUID;
 
 public class JsonSchemaInferrer {
-  private static TableSchema inferSchemaFromSample(
+  public static TableSchema inferSchemaFromSample(
       String jsonDataLocation, String project, String dataset) throws Exception {
     String tableUuid = UUID.randomUUID().toString();
     String tableName = "import-json-sample" + tableUuid;
@@ -30,7 +30,9 @@ public class JsonSchemaInferrer {
     Job job = bigquery.create(JobInfo.of(loadConfig));
     job = job.waitFor();
     if (job.isDone()) {
-      Schema schema = bigquery.getTable(tableId).list().getSchema();
+      Schema schema = bigquery.getTable(tableId).getDefinition().getSchema();
+      bigquery.delete(tableId);  // Remove table after schema is read
+      assert schema != null;
       return schema2TableSchema(schema);
     } else {
       throw new Exception(
