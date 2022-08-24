@@ -1,20 +1,20 @@
 package dev.herraiz.beam.pipelines;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.api.services.bigquery.model.TableReference;
-import com.google.api.services.bigquery.model.TableSchema;
 import dev.herraiz.beam.options.Elastic2BQOptions;
-import dev.herraiz.beam.schemas.JsonSchemaInferrer;
 import dev.herraiz.beam.schemas.JsonSchemaParser;
+import java.io.File;
+import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.List;
 import java.util.Optional;
 import org.apache.beam.runners.dataflow.options.DataflowPipelineOptions;
 import org.apache.beam.sdk.Pipeline;
+import org.apache.beam.sdk.io.FileSystems;
 import org.apache.beam.sdk.io.elasticsearch.ElasticsearchIO;
 import org.apache.beam.sdk.io.elasticsearch.ElasticsearchIO.ConnectionConfiguration;
+import org.apache.beam.sdk.io.fs.ResourceId;
 import org.apache.beam.sdk.io.gcp.bigquery.BigQueryIO;
 import org.apache.beam.sdk.io.gcp.bigquery.BigQueryIO.Write;
 import org.apache.beam.sdk.io.gcp.bigquery.BigQueryIO.Write.CreateDisposition;
@@ -36,12 +36,11 @@ public class Elastic2BQ {
     runPipeline(options);
   }
 
-
   private static void runPipeline(Elastic2BQOptions options) throws Exception {
     // BigQuery options
-    String bigQueryProject = options.getBigQueryProject();
-    if (bigQueryProject == null)
-      bigQueryProject = options.as(DataflowPipelineOptions.class).getProject();
+    String bigQueryProject =
+        Optional.ofNullable(options.getBigQueryProject())
+            .orElse(options.as(DataflowPipelineOptions.class).getProject());
 
     String bigQueryDataset = options.getBigQueryDataset();
     String bigQueryTable = options.getBigQueryTable();
@@ -68,7 +67,7 @@ public class Elastic2BQ {
 
     // Schema options
     String schemaLocation = options.getSchema();
-    String schemaStr = Files.readString(Path.of(schemaLocation));
+    String schemaStr = readSchemaFile(schemaLocation);
     Schema schema = JsonSchemaParser.bqJson2BeamSchema(schemaStr);
 
     Pipeline p = Pipeline.create(options);
@@ -105,5 +104,19 @@ public class Elastic2BQ {
         .withWriteDisposition(WriteDisposition.WRITE_APPEND)
         .withMethod(Write.Method.FILE_LOADS)
         .useBeamSchema();
+  }
+
+  private static String readSchemaFile(String schemaLocation) throws IOException {
+    ResourceId schemaResource = FileSystems.matchNewResource(schemaLocation, false);
+    File tempFile = File.createTempFile("schema", ".json");
+    ResourceId localTempFileDestination =
+        FileSystems.matchNewResource("file://" + tempFile.getAbsolutePath(), false);
+    FileSystems.copy(List.of(schemaResource), List.of(localTempFileDestination));
+
+    String schemaStr = Files.readString(Path.of(tempFile.getAbsolutePath()));
+
+    assert tempFile.delete();
+
+    return schemaStr;
   }
 }
