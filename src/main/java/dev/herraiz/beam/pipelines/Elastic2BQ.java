@@ -1,32 +1,40 @@
 package dev.herraiz.beam.pipelines;
 
 import com.google.api.services.bigquery.model.TableReference;
+import com.google.cloud.storage.Blob;
+import com.google.cloud.storage.BlobId;
+import com.google.cloud.storage.Storage;
+import com.google.cloud.storage.StorageOptions;
 import dev.herraiz.beam.options.Elastic2BQOptions;
 import dev.herraiz.beam.schemas.JsonSchemaParser;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.List;
 import java.util.Optional;
 import org.apache.beam.runners.dataflow.options.DataflowPipelineOptions;
 import org.apache.beam.sdk.Pipeline;
-import org.apache.beam.sdk.io.FileSystems;
 import org.apache.beam.sdk.io.elasticsearch.ElasticsearchIO;
 import org.apache.beam.sdk.io.elasticsearch.ElasticsearchIO.ConnectionConfiguration;
-import org.apache.beam.sdk.io.fs.ResourceId;
 import org.apache.beam.sdk.io.gcp.bigquery.BigQueryIO;
 import org.apache.beam.sdk.io.gcp.bigquery.BigQueryIO.Write;
 import org.apache.beam.sdk.io.gcp.bigquery.BigQueryIO.Write.CreateDisposition;
 import org.apache.beam.sdk.io.gcp.bigquery.BigQueryIO.Write.WriteDisposition;
 import org.apache.beam.sdk.options.PipelineOptionsFactory;
 import org.apache.beam.sdk.schemas.Schema;
+import org.apache.beam.sdk.transforms.DoFn;
 import org.apache.beam.sdk.transforms.JsonToRow;
 import org.apache.beam.sdk.transforms.JsonToRow.ParseResult;
+import org.apache.beam.sdk.transforms.MapElements;
+import org.apache.beam.sdk.transforms.ParDo;
 import org.apache.beam.sdk.values.PCollection;
 import org.apache.beam.sdk.values.Row;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class Elastic2BQ {
+
+  private static final Logger logger = LoggerFactory.getLogger(Elastic2BQ.class);
 
   public static void main(String[] args) throws Exception {
     // Parse and set options
@@ -37,10 +45,10 @@ public class Elastic2BQ {
   }
 
   private static void runPipeline(Elastic2BQOptions options) throws Exception {
+
     // BigQuery options
-    String bigQueryProject =
-        Optional.ofNullable(options.getBigQueryProject())
-            .orElse(options.as(DataflowPipelineOptions.class).getProject());
+    String gcpProject = options.as(DataflowPipelineOptions.class).getProject();
+    String bigQueryProject = Optional.ofNullable(options.getBigQueryProject()).orElse(gcpProject);
 
     String bigQueryDataset = options.getBigQueryDataset();
     String bigQueryTable = options.getBigQueryTable();
@@ -65,12 +73,13 @@ public class Elastic2BQ {
     // Elastic options
     String[] host = {options.getElasticHost()};
 
+    // Register options before trying to grab the schema file from remote storage
+    Pipeline p = Pipeline.create(options);
+
     // Schema options
     String schemaLocation = options.getSchema();
-    String schemaStr = readSchemaFile(schemaLocation);
+    String schemaStr = readSchemaFile(schemaLocation, gcpProject);
     Schema schema = JsonSchemaParser.bqJson2BeamSchema(schemaStr);
-
-    Pipeline p = Pipeline.create(options);
 
     // Read data from Elastic as JSON strings
     PCollection<String> jsonStrings =
@@ -78,12 +87,12 @@ public class Elastic2BQ {
             "Read from Elastic",
             ElasticsearchIO.read()
                 .withConnectionConfiguration(
-                    ConnectionConfiguration.create(
-                        host, options.getElasticIndex(), options.getElasticType())));
+                    ConnectionConfiguration.create(host, options.getElasticIndex())));
 
     // Parse JSON strings to Beam Row
     ParseResult parsedJson =
-        jsonStrings.apply("Parse JSON", JsonToRow.withExceptionReporting(schema));
+        jsonStrings.apply(
+            "Parse JSON", JsonToRow.withExceptionReporting(schema).withExtendedErrorInfo());
 
     // This will have our schema
     PCollection<Row> correct = parsedJson.getResults();
@@ -93,29 +102,40 @@ public class Elastic2BQ {
     // Write to BigQuery
     correct.apply("Write correct to BQ", bqWriteForTable(correctTableRef));
     failed.apply("Write failures to BQ", bqWriteForTable(errorsTableRef));
+
+    p.run().waitUntilFinish();
   }
 
   private static Write<Row> bqWriteForTable(TableReference table) {
     return BigQueryIO.<Row>write()
         .to(table)
         .optimizedWrites()
-        .withAutoSharding()
         .withCreateDisposition(CreateDisposition.CREATE_IF_NEEDED)
-        .withWriteDisposition(WriteDisposition.WRITE_APPEND)
+        .withWriteDisposition(WriteDisposition.WRITE_TRUNCATE)
         .withMethod(Write.Method.FILE_LOADS)
         .useBeamSchema();
   }
 
-  private static String readSchemaFile(String schemaLocation) throws IOException {
-    ResourceId schemaResource = FileSystems.matchNewResource(schemaLocation, false);
+  private static String readSchemaFile(String schemaLocation, String projectId) throws IOException {
+    if (!schemaLocation.startsWith("gs:")) {
+      System.out.println("The schema file must be located inside a GSC bucket.");
+      System.exit(1);
+    }
+
     File tempFile = File.createTempFile("schema", ".json");
-    ResourceId localTempFileDestination =
-        FileSystems.matchNewResource("file://" + tempFile.getAbsolutePath(), false);
-    FileSystems.copy(List.of(schemaResource), List.of(localTempFileDestination));
+    String pathStr = tempFile.getAbsolutePath();
 
-    String schemaStr = Files.readString(Path.of(tempFile.getAbsolutePath()));
+    logger.info("Downloading schema to " + pathStr);
 
+    Path path = Path.of(pathStr);
+    StorageOptions options = StorageOptions.newBuilder().setProjectId(projectId).build();
+    Storage storage = options.getService();
+    Blob blob = storage.get(BlobId.fromGsUtilUri(schemaLocation));
+    blob.downloadTo(path);
+    String schemaStr = Files.readString(path);
     assert tempFile.delete();
+
+    logger.info("Deleted " + pathStr);
 
     return schemaStr;
   }

@@ -16,11 +16,6 @@ public interface Elastic2BQOptions extends PipelineOptions {
 
   void setElasticIndex(String s);
 
-  @Description("ELasticSearch type to copy to BigQuery")
-  String getElasticType();
-
-  void setElasticType(String s);
-
   @Description("BigQuery project")
   String getBigQueryProject();
 
