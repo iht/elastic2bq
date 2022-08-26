@@ -6,6 +6,8 @@ import com.google.cloud.storage.BlobId;
 import com.google.cloud.storage.Storage;
 import com.google.cloud.storage.StorageOptions;
 import dev.herraiz.beam.options.Elastic2BQOptions;
+import dev.herraiz.beam.parser.Json2Row;
+import dev.herraiz.beam.parser.Json2Row.JsonParseResult;
 import dev.herraiz.beam.schemas.JsonSchemaParser;
 import java.io.File;
 import java.io.IOException;
@@ -87,14 +89,14 @@ public class Elastic2BQ {
                     ConnectionConfiguration.create(host, options.getElasticIndex())));
 
     // Parse JSON strings to Beam Row
-    ParseResult parsedJson =
-        jsonStrings.apply(
-            "Parse JSON", JsonToRow.withExceptionReporting(schema).withExtendedErrorInfo());
+
+    JsonParseResult parsingResult = jsonStrings.apply(
+            "Parse JSON", new Json2Row(schema));
 
     // This will have our schema
-    PCollection<Row> correct = parsedJson.getResults();
+    PCollection<Row> correct = parsingResult.parsedRows();
     // And the failures will have ERROR_ROW_SCHEMA
-    PCollection<Row> failed = parsedJson.getFailedToParseLines();
+    PCollection<Row> failed = parsingResult.failedRows();
 
     // Write to BigQuery
     correct.apply("Write correct to BQ", bqWriteForTable(correctTableRef));
