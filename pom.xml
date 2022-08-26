@@ -72,13 +72,6 @@
         <version>${maven-compiler-plugin.version}</version>
         <configuration>
           <release>17</release>
-          <annotationProcessorPaths>
-            <path>
-              <groupId>com.google.auto.value</groupId>
-              <artifactId>auto-value</artifactId>
-              <version>${auto-value.version}</version>
-            </path>
-          </annotationProcessorPaths>
         </configuration>
       </plugin>
 
@@ -328,9 +321,14 @@
       <groupId>com.google.auto.value</groupId>
       <artifactId>auto-value-annotations</artifactId>
       <version>${auto-value.version}</version>
-      <scope>provided</scope>
     </dependency>
 
+    <dependency>
+      <groupId>com.google.auto.value</groupId>
+      <artifactId>auto-value</artifactId>
+      <version>${auto-value.version}</version>
+      <optional>true</optional>
+    </dependency>
   </dependencies>
 
   <dependencyManagement>
