@@ -37,12 +37,21 @@ you in the creation of a schema file.
 Once you obtain a schema, it is advised to review the generated schema, and adjust any type that might not
 have been inferred properly.
 
-### Running the schema inference utility
+### Data format for the inference utility
 
 The schema inference utility requires the JSON data to be located in Google Cloud Storage, in the form of
 a file, with each JSON element in a single line.
 
-Extract some data from Elastic, and if it is 
+To transform the data extracted from Elastic into a file with a single JSON element per line, you can use the
+[`jq` utility](https://stedolan.github.io/jq/).
+
+`cat mydata.json | jq -c > oneline_per_element.json`
+
+Then upload the `oneline_per_element.json` file to Google Cloud Storage.
+
+For an example of this format, have a look at the `data/commits.json` file in this repository.
+
+### Running the schema inference utility
 
 Once you have built the package, add the location to an environment variable in the shell
 
@@ -67,9 +76,42 @@ been inferred. The schema will be written to a local file.
 The utility will refuse to overwrite the local output file for the schema, so the destination file must not
 exist.
 
+The output file must be local; you will need to upload it to Google Cloud Storage later.
+
 ## Running the pipeline locally
 
-TODO
+Build the package and export the location of the JAR:
+
+`export MYJAR=./target/elastic2bq-bundled-0.1-SNAPSHOT.jar`
+
+You can run the pipeline in local with these arguments:
+
+```shell
+java -cp $JAR dev.herraiz.beam.pipelines.Elastic2BQ \
+ --runner=DirectRunner \
+ --elasticHost="http://localhost:9200" \
+ --elasticIndex=<YOUR ELASTIC INDEX NAME> \ 
+ --project=<GCP PROJECT ID> \
+ --tempLocation=<GCS LOCATION FOR TEMPORARY FILES> \
+ --bigQueryDataset=<BIGQUERY DATASET ID> \ 
+ --bigQueryTable=<TABLE NAME FOR THE DATA> \ 
+ --bigQueryErrorsTable=<TABLE NAME FOR PARSING ERRORS> \ 
+ --schema=<GCS LOCATION OF SCHEMA FILE> 
+```
+
+For the BigQuery destination tables, you can also write each table to a different project and dataset, using
+the options `--bigQueryProject`, `--bigQueryErrorsDataset` and/or `--bigQueryErrorsProject`. The datasets
+must exist before running the pipeline, and the credentials must have permissions to create tables in those
+datasets.
+
+Here we assume that you are running with a local Elasticsearch server. See below for how to create one and
+populate it with some data.
+
+The schema must be located in Google Cloud Storage. If you have used the Schema Inference Utility, make sure
+that you upload the generated file to GCS.
+
+Once you have run the pipeline, you should see two new tables in the BigQuery dataset.
+
 
 ## Running the pipeline in Dataflow
 
@@ -77,12 +119,26 @@ TODO
 
 ## Google Cloud requirements
 
-This pipeline requires you to have a Google Cloud project, where to store data in BigQuery and Google Cloud
-Storage. The pipeline is inteded to be run in Dataflow, although with the corresponding additional runner
+Both the pipeline and the inference utility require to have access to Google Cloud credentials to use
+BigQuery and Google Cloud Storage.
+
+If you are using the Google Cloud SDK, make sure you configure it with your user and project id, and that
+you run both:
+
+`gcloud auth login`
+
+and 
+
+`gcloud auth application-default login`
+
+The user needs permission to run Dataflow jobs, to read and write from Google Cloud Storage, and to create
+tables in the provided dataset in BigQuery.
+
+The pipeline is intended to be run in Dataflow, although with the corresponding additional runner
 dependencies, it should run in any Beam runner. 
 
-It can also be run with the DirectRunner, but you will still
-need to have a BigQuery dataset and a Google Cloud Storage bucket for the pipeline to work.
+It can also be run with the DirectRunner, but you will still  need to have a BigQuery dataset and a 
+Google Cloud Storage bucket for the pipeline to work.
 
 
 ## Getting some data to play with (for testing)
@@ -150,3 +206,5 @@ do
     --data "$l"
 done    
 ```
+
+You can now run the pipeline locally.
