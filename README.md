@@ -60,7 +60,7 @@ Once you have built the package, add the location to an environment variable in 
 and then run with the following options:
 
 ```shell
-java -cp $JAR dev.herraiz.beam.cli.InferSchemaFromData \
+java -cp $MYJAR dev.herraiz.beam.cli.InferSchemaFromData \
  --dataset=<BIGQUERY DATASET> \
  --project=<GCP PROJECT> \
  --data=<GCS DATA LOCATION> 
@@ -87,7 +87,7 @@ Build the package and export the location of the JAR:
 You can run the pipeline in local with these arguments:
 
 ```shell
-java -cp $JAR dev.herraiz.beam.pipelines.Elastic2BQ \
+java -cp $MYJAR dev.herraiz.beam.pipelines.Elastic2BQ \
  --runner=DirectRunner \
  --elasticHost="http://localhost:9200" \
  --elasticIndex=<YOUR ELASTIC INDEX NAME> \ 
