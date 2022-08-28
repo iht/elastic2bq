@@ -13,6 +13,7 @@ import com.google.cloud.bigquery.Schema;
 import com.google.cloud.bigquery.TableId;
 import java.util.List;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 public class JsonSchemaInferrer {
   public static TableSchema inferSchemaFromSample(
@@ -43,7 +44,7 @@ public class JsonSchemaInferrer {
 
   private static TableSchema schema2TableSchema(Schema s) {
     List<TableFieldSchema> fields =
-        s.getFields().stream().map(JsonSchemaInferrer::field2TableField).toList();
+        s.getFields().stream().map(JsonSchemaInferrer::field2TableField).collect(Collectors.toList());
 
     return new TableSchema().setFields(fields);
   }
@@ -62,7 +63,7 @@ public class JsonSchemaInferrer {
 
     if (f.getSubFields() != null) {
       List<TableFieldSchema> fieldsPb =
-          f.getSubFields().stream().map(JsonSchemaInferrer::field2TableField).toList();
+          f.getSubFields().stream().map(JsonSchemaInferrer::field2TableField).collect(Collectors.toList());
       fieldSchemaPb.setFields(fieldsPb);
     }
 

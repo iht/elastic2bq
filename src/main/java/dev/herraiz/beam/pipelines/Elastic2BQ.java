@@ -6,8 +6,7 @@ import com.google.cloud.storage.BlobId;
 import com.google.cloud.storage.Storage;
 import com.google.cloud.storage.StorageOptions;
 import dev.herraiz.beam.options.Elastic2BQOptions;
-import dev.herraiz.beam.parser.Json2Row;
-import dev.herraiz.beam.parser.Json2Row.JsonParseResult;
+import dev.herraiz.beam.parser.Json2RowWithSanitization;
 import dev.herraiz.beam.schemas.JsonSchemaParser;
 import java.io.File;
 import java.io.IOException;
@@ -24,7 +23,7 @@ import org.apache.beam.sdk.io.gcp.bigquery.BigQueryIO.Write.CreateDisposition;
 import org.apache.beam.sdk.io.gcp.bigquery.BigQueryIO.Write.WriteDisposition;
 import org.apache.beam.sdk.options.PipelineOptionsFactory;
 import org.apache.beam.sdk.schemas.Schema;
-import org.apache.beam.sdk.transforms.JsonToRow;
+
 import org.apache.beam.sdk.transforms.JsonToRow.ParseResult;
 import org.apache.beam.sdk.values.PCollection;
 import org.apache.beam.sdk.values.Row;
@@ -89,20 +88,19 @@ public class Elastic2BQ {
                     ConnectionConfiguration.create(host, options.getElasticIndex())));
 
     // Parse JSON strings to Beam Row
-
-    JsonParseResult parsingResult = jsonStrings.apply(
-            "Parse JSON", new Json2Row(schema));
+    ParseResult parsingResult = jsonStrings.apply(
+            "Parse JSON", new Json2RowWithSanitization(schema));
 
     // This will have our schema
-    PCollection<Row> correct = parsingResult.parsedRows();
-    // And the failures will have ERROR_ROW_SCHEMA
-    PCollection<Row> failed = parsingResult.failedRows();
+    PCollection<Row> correct = parsingResult.getResults();
+    // And the failures will have ERROR_ROW_WITH_ERR_MSG_SCHEMA
+    PCollection<Row> failed = parsingResult.getFailedToParseLines();
 
     // Write to BigQuery
     correct.apply("Write correct to BQ", bqWriteForTable(correctTableRef));
     failed.apply("Write failures to BQ", bqWriteForTable(errorsTableRef));
 
-    p.run().waitUntilFinish();
+    p.run(); //.waitUntilFinish();
   }
 
   private static Write<Row> bqWriteForTable(TableReference table) {
@@ -132,6 +130,7 @@ public class Elastic2BQ {
     Blob blob = storage.get(BlobId.fromGsUtilUri(schemaLocation));
     blob.downloadTo(path);
     String schemaStr = Files.readString(path);
+//    String schemaStr = Files.readString(Path.of("/Users/ihr/github/elastic2bq/schema.json"));
     assert tempFile.delete();
 
     logger.info("Deleted " + pathStr);
