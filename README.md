@@ -115,7 +115,12 @@ Once you have run the pipeline, you should see two new tables in the BigQuery da
 
 ## Running the pipeline in Dataflow
 
-TODO
+The options are the same as in the case of the direct runner (except `--runner=DataflowRunner`), 
+but you may need to add additional options  for networking, so the Dataflow workers can reach the 
+ElasticSearch server. For instance, the workers and the server may run in the same VPC, or you may need
+to do VPC peering between the VPC where ElasticSearch is located and the workers' VPC. For more details, see:
+
+* https://cloud.google.com/dataflow/docs/guides/specifying-networks
 
 ## Google Cloud requirements
 
