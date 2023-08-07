@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 Israel Herraiz. 
+ * Copyright 2023 Israel Herraiz.
  *
  * Licensed under the Apache License, Version 2.0 (the 'License');
  * you may not use this file except in compliance with the License.
@@ -14,7 +14,7 @@
 * limitations under the License.
 */
 
-package dev.herraiz.beam.cli;
+package dev.herraiz.cli;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.api.services.bigquery.model.TableSchema;
