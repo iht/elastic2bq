@@ -20,13 +20,12 @@ parsing error.
 
 You will need Java 17 to compile and run the pipeline and the utility.
 
-For the build process, you need Maven.
+For the build process, you need Gradle. Run the following script, and it should install all the
+required Gradle dependencies if you don't have them already:
 
-If you have both installed, just run:
+`./gradlew build`
 
-`mvn package`
-
-This will create a package of name `elastic2bq-bundled-0.1-SNAPSHOT.jar` in the `target/` subdirectory.
+This will create a package of name `elastic2bq-<COMMIT_HASH>-SNAPSHOT.jar` in the `build/` subdirectory.
 
 ## Schema inference utility
 
