@@ -7,16 +7,16 @@ The schema of the index can be inferred using a command line utility provided wi
 
 The input sources for this pipeline are the following:
 
-* An Elastic search host and index
-* A file in Google Cloud Storage with the schema of the index, in BigQuery JSON format.
+- An Elastic search host and index
+- A file in Google Cloud Storage with the schema of the index, in BigQuery JSON format.
 
 The outputs of the pipeline are the following:
 
-* A table in BigQuery with the contents of the index
-* An errors table, for those JSON elements that could not be parsed, including information about the specific
-parsing error.
+- A table in BigQuery with the contents of the index
+- An errors table, for those JSON elements that could not be parsed, including information about the specific
+  parsing error.
 
-## Building the pipeline and the utility
+## Building the pipeline and the utility∏
 
 You will need Java 17 to compile and run the pipeline and the utility.
 
@@ -111,15 +111,14 @@ that you upload the generated file to GCS.
 
 Once you have run the pipeline, you should see two new tables in the BigQuery dataset.
 
-
 ## Running the pipeline in Dataflow
 
 The options are the same as in the case of the direct runner (except `--runner=DataflowRunner`),
-but you may need to add additional options  for networking, so the Dataflow workers can reach the
+but you may need to add additional options for networking, so the Dataflow workers can reach the
 ElasticSearch server. For instance, the workers and the server may run in the same VPC, or you may need
 to do VPC peering between the VPC where ElasticSearch is located and the workers' VPC. For more details, see:
 
-* https://cloud.google.com/dataflow/docs/guides/specifying-networks
+- https://cloud.google.com/dataflow/docs/guides/specifying-networks
 
 ## Google Cloud requirements
 
@@ -141,9 +140,8 @@ tables in the provided dataset in BigQuery.
 The pipeline is intended to be run in Dataflow, although with the corresponding additional runner
 dependencies, it should run in any Beam runner.
 
-It can also be run with the DirectRunner, but you will still  need to have a BigQuery dataset and a
+It can also be run with the DirectRunner, but you will still need to have a BigQuery dataset and a
 Google Cloud Storage bucket for the pipeline to work.
-
 
 ## Getting some data to play with (for testing)
 
