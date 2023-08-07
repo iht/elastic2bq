@@ -1,7 +1,7 @@
 # Elastic to BigQuery
 
 This pipeline will take a ElasticSearch index and will create a table with the contents of that index in
-BigQuery. 
+BigQuery.
 
 The schema of the index can be inferred using a command line utility provided with the pipeline.
 
@@ -14,7 +14,7 @@ The outputs of the pipeline are the following:
 
 * A table in BigQuery with the contents of the index
 * An errors table, for those JSON elements that could not be parsed, including information about the specific
-  parsing error.
+parsing error.
 
 ## Building the pipeline and the utility
 
@@ -61,10 +61,10 @@ and then run with the following options:
 
 ```shell
 java -cp $MYJAR dev.herraiz.beam.cli.InferSchemaFromData \
- --dataset=<BIGQUERY DATASET> \
- --project=<GCP PROJECT> \
- --data=<GCS DATA LOCATION> 
- --output=<LOCAL OUTPUT FILE FOR SCHEMA>
+--dataset=<BIGQUERY DATASET> \
+--project=<GCP PROJECT> \
+--data=<GCS DATA LOCATION>
+--output=<LOCAL OUTPUT FILE FOR SCHEMA>
 ```
 
 You need to have a pre-existing BigQuery dataset, and the data already uploaded to Google Cloud Storage. Just
@@ -88,15 +88,15 @@ You can run the pipeline in local with these arguments:
 
 ```shell
 java -cp $MYJAR dev.herraiz.beam.pipelines.Elastic2BQ \
- --runner=DirectRunner \
- --elasticHost="http://localhost:9200" \
- --elasticIndex=<YOUR ELASTIC INDEX NAME> \ 
- --project=<GCP PROJECT ID> \
- --tempLocation=<GCS LOCATION FOR TEMPORARY FILES> \
- --bigQueryDataset=<BIGQUERY DATASET ID> \ 
- --bigQueryTable=<TABLE NAME FOR THE DATA> \ 
- --bigQueryErrorsTable=<TABLE NAME FOR PARSING ERRORS> \ 
- --schema=<GCS LOCATION OF SCHEMA FILE> 
+--runner=DirectRunner \
+--elasticHost="http://localhost:9200" \
+--elasticIndex=<YOUR ELASTIC INDEX NAME> \
+--project=<GCP PROJECT ID> \
+--tempLocation=<GCS LOCATION FOR TEMPORARY FILES> \
+--bigQueryDataset=<BIGQUERY DATASET ID> \
+--bigQueryTable=<TABLE NAME FOR THE DATA> \
+--bigQueryErrorsTable=<TABLE NAME FOR PARSING ERRORS> \
+--schema=<GCS LOCATION OF SCHEMA FILE>
 ```
 
 For the BigQuery destination tables, you can also write each table to a different project and dataset, using
@@ -115,8 +115,8 @@ Once you have run the pipeline, you should see two new tables in the BigQuery da
 
 ## Running the pipeline in Dataflow
 
-The options are the same as in the case of the direct runner (except `--runner=DataflowRunner`), 
-but you may need to add additional options  for networking, so the Dataflow workers can reach the 
+The options are the same as in the case of the direct runner (except `--runner=DataflowRunner`),
+but you may need to add additional options  for networking, so the Dataflow workers can reach the
 ElasticSearch server. For instance, the workers and the server may run in the same VPC, or you may need
 to do VPC peering between the VPC where ElasticSearch is located and the workers' VPC. For more details, see:
 
@@ -132,7 +132,7 @@ you run both:
 
 `gcloud auth login`
 
-and 
+and
 
 `gcloud auth application-default login`
 
@@ -140,9 +140,9 @@ The user needs permission to run Dataflow jobs, to read and write from Google Cl
 tables in the provided dataset in BigQuery.
 
 The pipeline is intended to be run in Dataflow, although with the corresponding additional runner
-dependencies, it should run in any Beam runner. 
+dependencies, it should run in any Beam runner.
 
-It can also be run with the DirectRunner, but you will still  need to have a BigQuery dataset and a 
+It can also be run with the DirectRunner, but you will still  need to have a BigQuery dataset and a
 Google Cloud Storage bucket for the pipeline to work.
 
 
@@ -155,7 +155,7 @@ the pipeline locally, etc.
 
 This is for testing purposes, to have a Elastic instance to run the pipeline.
 
-Install minikube and helm (e.g. using Homebrew on Mac). 
+Install minikube and helm (e.g. using Homebrew on Mac).
 
 Then run minikube and follow these instructions to add Elastic to the minikube instance.
 
@@ -205,11 +205,11 @@ Then import some sample data provided in this repository:
 ```shell
 cat data/commits.json | while read l
 do
-  curl --request POST \
-    --url 'http://localhost:9200/git/_doc/?pretty=' \
-    --header 'Content-Type: application/json' \
-    --data "$l"
-done    
+curl --request POST \
+	--url 'http://localhost:9200/git/_doc/?pretty=' \
+	--header 'Content-Type: application/json' \
+	--data "$l"
+done
 ```
 
 You can now run the pipeline locally.

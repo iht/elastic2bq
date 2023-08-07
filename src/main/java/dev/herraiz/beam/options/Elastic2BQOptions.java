@@ -1,18 +1,18 @@
 /*
- * Copyright 2022 Israel Herraiz
+ * Copyright 2023 Israel Herraiz. 
  *
- * Licensed under the Apache License, Version 2.0 (the "License");
+ * Licensed under the Apache License, Version 2.0 (the 'License');
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
  *     http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
+* distributed under the License is distributed on an "AS IS" BASIS,
+* WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+* See the License for the specific language governing permissions and
+* limitations under the License.
+*/
 
 package dev.herraiz.beam.options;
 
@@ -22,51 +22,53 @@ import org.apache.beam.sdk.options.Validation.Required;
 
 public interface Elastic2BQOptions extends PipelineOptions {
 
-  @Description("Hostname of the ElasticSearch server, including port")
-  String getElasticHost();
+    @Description("Hostname of the ElasticSearch server, including port")
+    String getElasticHost();
 
-  void setElasticHost(String s);
+    void setElasticHost(String s);
 
-  @Description("ElasticSearch index to copy to BigQuery")
-  String getElasticIndex();
+    @Description("ElasticSearch index to copy to BigQuery")
+    String getElasticIndex();
 
-  void setElasticIndex(String s);
+    void setElasticIndex(String s);
 
-  @Description("BigQuery project")
-  String getBigQueryProject();
+    @Description("BigQuery project")
+    String getBigQueryProject();
 
-  void setBigQueryProject(String s);
+    void setBigQueryProject(String s);
 
-  @Required
-  @Description("BigQuery dataset for the main table")
-  String getBigQueryDataset();
+    @Required
+    @Description("BigQuery dataset for the main table")
+    String getBigQueryDataset();
 
-  void setBigQueryDataset(String s);
+    void setBigQueryDataset(String s);
 
-  @Description("BigQuery destination table name")
-  String getBigQueryTable();
+    @Description("BigQuery destination table name")
+    String getBigQueryTable();
 
-  void setBigQueryTable(String s);
+    void setBigQueryTable(String s);
 
-  @Description(
-      "BigQuery project for the errors table. Optional, if not passed the same project will be used for errors")
-  String getBigQueryErrorsProject();
+    @Description(
+            "BigQuery project for the errors table. Optional, if not passed the same project will"
+                    + " be used for errors")
+    String getBigQueryErrorsProject();
 
-  void setBigQueryErrorsProject(String s);
+    void setBigQueryErrorsProject(String s);
 
-  @Description(
-      "BigQuery dataset for the errors table. Optional, if not passed the same dataset will be used for errors")
-  String getBigQueryErrorsDataset();
+    @Description(
+            "BigQuery dataset for the errors table. Optional, if not passed the same dataset will"
+                    + " be used for errors")
+    String getBigQueryErrorsDataset();
 
-  void setBigQueryErrorsDataset(String s);
+    void setBigQueryErrorsDataset(String s);
 
-  @Description("BigQuery table name for the parsing errors")
-  String getBigQueryErrorsTable();
+    @Description("BigQuery table name for the parsing errors")
+    String getBigQueryErrorsTable();
 
-  void setBigQueryErrorsTable(String s);
+    void setBigQueryErrorsTable(String s);
 
-  @Description("Location of a JSON file with the schema of the data, in BQ JSON schema format")
-  String getSchema();
+    @Description("Location of a JSON file with the schema of the data, in BQ JSON schema format")
+    String getSchema();
 
-  void setSchema(String s);
+    void setSchema(String s);
 }
