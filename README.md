@@ -14,7 +14,7 @@ The outputs of the pipeline are the following:
 
 - A table in BigQuery with the contents of the index
 - An errors table, for those JSON elements that could not be parsed, including information about the specific
-  parsing error.
+parsing error.
 
 ## Building the pipeline and the utility∏
 

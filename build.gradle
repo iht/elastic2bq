@@ -76,6 +76,7 @@ dependencies {
 	implementation "org.apache.beam:beam-sdks-java-core"
 	runtimeOnly "org.apache.beam:beam-runners-direct-java"
 	implementation "org.apache.beam:beam-runners-google-cloud-dataflow-java"
+runtimeOnly "org.apache.beam:beam-runners-google-cloud-dataflow-java"
 	implementation "org.apache.beam:beam-sdks-java-io-google-cloud-platform"
 	implementation "org.apache.beam:beam-sdks-java-io-elasticsearch"
 
