@@ -59,7 +59,7 @@ Once you have built the package, add the location to an environment variable in 
 and then run with the following options:
 
 ```shell
-java -cp $MYJAR dev.herraiz.beam.cli.InferSchemaFromData \
+java -cp $MYJAR dev.herraiz.cli.InferSchemaFromData \
 --dataset=<BIGQUERY DATASET> \
 --project=<GCP PROJECT> \
 --data=<GCS DATA LOCATION>
