@@ -148,8 +148,6 @@ public class Elastic2BQ {
         Blob blob = storage.get(BlobId.fromGsUtilUri(schemaLocation));
         blob.downloadTo(path);
         String schemaStr = Files.readString(path);
-        //    String schemaStr =
-        // Files.readString(Path.of("/Users/ihr/github/elastic2bq/schema.json"));
         assert tempFile.delete();
 
         logger.info("Deleted " + pathStr);
