@@ -40,6 +40,7 @@ import org.apache.beam.sdk.io.gcp.bigquery.BigQueryIO.Write.CreateDisposition;
 import org.apache.beam.sdk.io.gcp.bigquery.BigQueryIO.Write.WriteDisposition;
 import org.apache.beam.sdk.options.PipelineOptionsFactory;
 import org.apache.beam.sdk.schemas.Schema;
+import org.apache.beam.sdk.transforms.JsonToRow.JsonToRowWithErrFn;
 import org.apache.beam.sdk.transforms.JsonToRow.ParseResult;
 import org.apache.beam.sdk.values.PCollection;
 import org.apache.beam.sdk.values.Row;
@@ -130,9 +131,12 @@ public class Elastic2BQ {
                 jsonStrings.apply("Parse JSON", new Json2RowWithSanitization(schema));
 
         // This will have our schema
-        PCollection<Row> correct = parsingResult.getResults();
+        PCollection<Row> correct = parsingResult.getResults().setRowSchema(schema);
         // And the failures will have ERROR_ROW_WITH_ERR_MSG_SCHEMA
-        PCollection<Row> failed = parsingResult.getFailedToParseLines();
+        PCollection<Row> failed =
+                parsingResult
+                        .getFailedToParseLines()
+                        .setRowSchema(JsonToRowWithErrFn.ERROR_ROW_SCHEMA);
 
         // Write to BigQuery
         correct.apply("Write correct to BQ", bqWriteForTable(correctTableRef));
