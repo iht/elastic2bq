@@ -53,7 +53,7 @@ public class Elastic2BQ {
     public static void main(String[] args) throws Exception {
         // Parse and set options
         Elastic2BQOptions options =
-                PipelineOptionsFactory.fromArgs(args).withValidation().as(Elastic2BQOptions.class);
+                PipelineOptionsFactory.fromArgs(args).as(Elastic2BQOptions.class);
 
         runPipeline(options);
     }
