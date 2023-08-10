@@ -101,6 +101,8 @@ java -cp $MYJAR dev.herraiz.beam.pipelines.Elastic2BQ \
 For reading from Elastic, you can also apply a query, using the option `--query`, to apply a query
 to the index. The output of the query is what it will be written to BigQuery.
 
+You can also optionally set a `--username` and `--password` to connect to Elastic.
+
 For the BigQuery destination tables, you can also write each table to a different project and dataset, using
 the options `--bigQueryProject`, `--bigQueryErrorsDataset` and/or `--bigQueryErrorsProject`. The datasets
 must exist before running the pipeline, and the credentials must have permissions to create tables in those

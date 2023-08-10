@@ -98,17 +98,27 @@ public class Elastic2BQ {
         String schemaStr = readSchemaFile(schemaLocation, gcpProject);
         Schema schema = JsonSchemaParser.bqJson2BeamSchema(schemaStr);
 
+        String username = options.getUsername();
+        String password = options.getPassword();
+
         Read elasticReadTransform;
+        ConnectionConfiguration connConfiguration;
+        if (username.isEmpty()) {
+            connConfiguration = ConnectionConfiguration.create(host, elasticIndex);
+        } else {
+            connConfiguration =
+                    ConnectionConfiguration.create(host, elasticIndex)
+                            .withUsername(username)
+                            .withPassword(password);
+        }
+
         if (query.isEmpty()) {
             elasticReadTransform =
-                    ElasticsearchIO.read()
-                            .withConnectionConfiguration(
-                                    ConnectionConfiguration.create(host, elasticIndex));
+                    ElasticsearchIO.read().withConnectionConfiguration(connConfiguration);
         } else {
             elasticReadTransform =
                     ElasticsearchIO.read()
-                            .withConnectionConfiguration(
-                                    ConnectionConfiguration.create(host, elasticIndex))
+                            .withConnectionConfiguration(connConfiguration)
                             .withQuery(query);
         }
 

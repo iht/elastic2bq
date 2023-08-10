@@ -35,11 +35,23 @@ public interface Elastic2BQOptions extends PipelineOptions {
 
     @Description(
             "ElasticSearch query to apply to the index. The output of the query will be written to"
-                    + " BQ.")
+                    + " BQ. Optional.")
     @Default.String("")
     String getQuery();
 
     void setQuery(String q);
+
+    @Description("Username for Elastic. Optional.")
+    @Default.String("")
+    String getUsername();
+
+    void setUsername(String u);
+
+    @Description("Password for Elastic. Optional")
+    @Default.String("")
+    String getPassword();
+
+    void setPassword(String p);
 
     @Description("BigQuery project")
     String getBigQueryProject();
