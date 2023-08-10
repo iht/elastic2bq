@@ -16,6 +16,7 @@
 
 package dev.herraiz.beam.options;
 
+import org.apache.beam.sdk.options.Default;
 import org.apache.beam.sdk.options.Description;
 import org.apache.beam.sdk.options.PipelineOptions;
 import org.apache.beam.sdk.options.Validation.Required;
@@ -31,6 +32,14 @@ public interface Elastic2BQOptions extends PipelineOptions {
     String getElasticIndex();
 
     void setElasticIndex(String s);
+
+    @Description(
+            "ElasticSearch query to apply to the index. The output of the query will be written to"
+                    + " BQ.")
+    @Default.String("")
+    String getQuery();
+
+    void setQuery(String q);
 
     @Description("BigQuery project")
     String getBigQueryProject();

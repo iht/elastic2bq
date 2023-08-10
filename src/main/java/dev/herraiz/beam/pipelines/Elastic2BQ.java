@@ -33,6 +33,7 @@ import org.apache.beam.runners.dataflow.options.DataflowPipelineOptions;
 import org.apache.beam.sdk.Pipeline;
 import org.apache.beam.sdk.io.elasticsearch.ElasticsearchIO;
 import org.apache.beam.sdk.io.elasticsearch.ElasticsearchIO.ConnectionConfiguration;
+import org.apache.beam.sdk.io.elasticsearch.ElasticsearchIO.Read;
 import org.apache.beam.sdk.io.gcp.bigquery.BigQueryIO;
 import org.apache.beam.sdk.io.gcp.bigquery.BigQueryIO.Write;
 import org.apache.beam.sdk.io.gcp.bigquery.BigQueryIO.Write.CreateDisposition;
@@ -86,6 +87,8 @@ public class Elastic2BQ {
 
         // Elastic options
         String[] host = {options.getElasticHost()};
+        String elasticIndex = options.getElasticIndex();
+        String query = options.getQuery();
 
         // Register options before trying to grab the schema file from remote storage
         Pipeline p = Pipeline.create(options);
@@ -95,14 +98,22 @@ public class Elastic2BQ {
         String schemaStr = readSchemaFile(schemaLocation, gcpProject);
         Schema schema = JsonSchemaParser.bqJson2BeamSchema(schemaStr);
 
+        Read elasticReadTransform;
+        if (query.isEmpty()) {
+            elasticReadTransform =
+                    ElasticsearchIO.read()
+                            .withConnectionConfiguration(
+                                    ConnectionConfiguration.create(host, elasticIndex));
+        } else {
+            elasticReadTransform =
+                    ElasticsearchIO.read()
+                            .withConnectionConfiguration(
+                                    ConnectionConfiguration.create(host, elasticIndex))
+                            .withQuery(query);
+        }
+
         // Read data from Elastic as JSON strings
-        PCollection<String> jsonStrings =
-                p.apply(
-                        "Read from Elastic",
-                        ElasticsearchIO.read()
-                                .withConnectionConfiguration(
-                                        ConnectionConfiguration.create(
-                                                host, options.getElasticIndex())));
+        PCollection<String> jsonStrings = p.apply("Read from Elastic", elasticReadTransform);
 
         // Parse JSON strings to Beam Row
         ParseResult parsingResult =
